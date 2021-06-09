@@ -3,7 +3,9 @@ import GameplayKit
 
 class GameScene: SKScene {
     var gameFields: [SKShapeNode]? = []
-    
+    var newSceneData: (new: Bool, startCount: Bool, startTime: TimeInterval?) =
+        (new: false, startCount: false, startTime: nil)
+
     override func didMove(to view: SKView) {
         backgroundColor = SKColor.orange
         
@@ -15,6 +17,9 @@ class GameScene: SKScene {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard !newSceneData.new else {
+            return
+        }
         for touch in touches {
             let locationUser = touch.location(in: self)
             for (index, field) in gameFields!.enumerated() {
@@ -26,7 +31,9 @@ class GameScene: SKScene {
                         state = .playerCircle
                     }
                     drawSymbol(state: state, index: index)
-                    
+                    if newSceneData.new {
+                        return
+                    }
                     computerPlay()
                 }
             }
@@ -34,8 +41,18 @@ class GameScene: SKScene {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        <#code#>
+        if newSceneData.new && !newSceneData.startCount {
+            newSceneData.startCount = true
+            newSceneData.startTime = currentTime
+        }
+        
+        if let startTime = newSceneData.startTime {
+            if (startTime + TimeInterval(3.0)) < currentTime {
+                resultScene()
+            }
+        }
     }
+    
     private func drawFields() {
         let rectSideSize = (size.width - size.width / 10) / 3
         let rectSideSizeF = CGFloat(Double(rectSideSize))
@@ -69,19 +86,12 @@ class GameScene: SKScene {
         }
     }
     
-    func drawSymbol(state: FieldState, index: Int) {
-        FieldStates.setState(index: index, state: state)
-        if checkWin(which: state) {
-            ResultScene.result = state
-            if state == .playerCircle {
-                resultScene()
-            } else {
-                resultScene()
-            }
-        } else if checkWin(which: .playerNone) {
-            ResultScene.result = .playerNone
-            resultScene()
+    func drawSymbol(state: FieldState, index: Int, drawRed: Bool = false, first: Bool = false) {
+        if drawRed && first {
+            removeAllChildren()
+            drawFields()
         }
+        
         let rectSideSize = Double(size.width - size.width / 10) / 3
         let width: Double = Double(size.width / 50)
         if state == FieldState.playerCross {
@@ -90,16 +100,24 @@ class GameScene: SKScene {
             
             let rect1 = SKShapeNode(rectOf: CGSize(width: width, height: height))
             rect1.fillColor = .black
+            if drawRed {
+                rect1.fillColor = .red
+            }
             rect1.strokeColor = .clear
             rect1.position = gameFields![index].position
+            
             let rotationAction1 = SKAction.rotate(byAngle: 45.0 * CGFloat.pi / 180, duration: 0)
             rect1.run(rotationAction1)
             addChild(rect1)
             
             let rect2 = SKShapeNode(rectOf: CGSize(width: width, height: height))
             rect2.fillColor = .black
+            if drawRed {
+                rect2.fillColor = .red
+            }
             rect2.strokeColor = .clear
             rect2.position = gameFields![index].position
+            
             let rotationAction2 = SKAction.rotate(byAngle: 45.0 * 3.0 * CGFloat.pi / 180, duration: 0)
             rect2.run(rotationAction2)
             addChild(rect2)
@@ -107,10 +125,31 @@ class GameScene: SKScene {
             let circle = SKShapeNode(circleOfRadius: CGFloat(rectSideSize / 2 - width / 2))
             circle.fillColor = .brown
             circle.strokeColor = .black
+            if drawRed {
+                circle.strokeColor = .red
+            }
             circle.lineWidth = CGFloat(width)
             circle.position = gameFields![index].position
             
+            
             addChild(circle)
+        }
+        
+        guard !drawRed else {
+            return
+        }
+        
+        FieldStates.setState(index: index, state: state)
+        if checkWin(which: state, gameScene: self) {
+            ResultScene.result = state
+            if state == .playerCircle {
+                newSceneData.new = true
+            } else {
+                newSceneData.new = true
+            }
+        } else if checkWin(which: .playerNone, gameScene: self) {
+            ResultScene.result = .playerNone
+            newSceneData.new = true
         }
     }
     
@@ -139,7 +178,11 @@ class GameScene: SKScene {
     }
 }
 
-func checkWin(which: FieldState) -> Bool{
+func checkWin(which: FieldState, gameScene: GameScene? = nil) -> Bool{
+    guard which != .error else {
+        print("Error: which is error")
+        return false
+    }
     let rows = [
         [0,3,6],
         [1,4,7],
@@ -166,7 +209,16 @@ func checkWin(which: FieldState) -> Bool{
                 count += 1
             }
         }
-        if count == 3 {
+        if count == 3 && gameScene != nil {
+            for (index, pos) in row.enumerated() {
+                if index == 0 {
+                    gameScene!.drawSymbol(state: which, index: pos, drawRed: true, first: true)
+                } else {
+                    gameScene!.drawSymbol(state: which, index: pos, drawRed: true, first: false)
+                }
+            }
+            return true
+        } else if count == 3 {
             return true
         }
     }
