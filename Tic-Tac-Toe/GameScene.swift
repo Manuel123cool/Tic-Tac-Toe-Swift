@@ -177,8 +177,19 @@ class GameScene: SKScene {
             
             if checkWin(which: state, stateArray: stateArray) {
                 index = avaialbleField
-            } else if checkWin(which: stateHuman, stateArray: stateArray) {
+                drawSymbol(state: state, index: index)
+                return
+            }
+        }
+        
+        for avaialbleField in availableFields {
+            var humanStateArray: [FieldState] = FieldStates.stateArray
+            humanStateArray[avaialbleField] = stateHuman
+            
+            if checkWin(which: stateHuman, stateArray: humanStateArray) {
                 index = avaialbleField
+                drawSymbol(state: state, index: index)
+                return
             }
         }
         drawSymbol(state: state, index: index)
