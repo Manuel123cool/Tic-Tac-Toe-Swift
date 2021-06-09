@@ -47,7 +47,7 @@ class GameScene: SKScene {
         }
         
         if let startTime = newSceneData.startTime {
-            if (startTime + TimeInterval(3.0)) < currentTime {
+            if (startTime + TimeInterval(2.0)) < currentTime {
                 resultScene()
             }
         }
@@ -158,16 +158,30 @@ class GameScene: SKScene {
         if (availableFields.isEmpty) {
             return
         }
-        let randomIndex = Int.random(in: 0..<availableFields.count)
+        var index = availableFields[Int.random(in: 0..<availableFields.count)]
+        
         
         let state: FieldState
+        let stateHuman: FieldState
         if FieldStates.computerIsCircle == true {
             state = .playerCircle
+            stateHuman = .playerCross
         } else {
             state = .playerCross
+            stateHuman = .playerCircle
         }
         
-        drawSymbol(state: state, index: availableFields[randomIndex])
+        for avaialbleField in availableFields {
+            var stateArray: [FieldState] = FieldStates.stateArray
+            stateArray[avaialbleField] = state
+            
+            if checkWin(which: state, stateArray: stateArray) {
+                index = avaialbleField
+            } else if checkWin(which: stateHuman, stateArray: stateArray) {
+                index = avaialbleField
+            }
+        }
+        drawSymbol(state: state, index: index)
     }
     
     private func resultScene() {
@@ -178,7 +192,9 @@ class GameScene: SKScene {
     }
 }
 
-func checkWin(which: FieldState, gameScene: GameScene? = nil) -> Bool{
+func checkWin(which: FieldState, stateArray: [FieldState] = FieldStates.stateArray,
+        gameScene: GameScene? = nil) -> Bool{
+    
     guard which != .error else {
         print("Error: which is error")
         return false
@@ -205,7 +221,7 @@ func checkWin(which: FieldState, gameScene: GameScene? = nil) -> Bool{
     for row in rows {
         var count = 0
         for pos in row {
-            if FieldStates.getState(pos) == which {
+            if stateArray[pos] == which {
                 count += 1
             }
         }
