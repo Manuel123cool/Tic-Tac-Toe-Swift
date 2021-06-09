@@ -11,9 +11,9 @@ class GameScene: SKScene {
         
         drawFields()
         
-        if Int.random(in: 0...1) == 0 {
+        /*if Int.random(in: 0...1) == 0 {
             computerPlay()
-        }
+        }*/
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -24,13 +24,7 @@ class GameScene: SKScene {
             let locationUser = touch.location(in: self)
             for (index, field) in gameFields!.enumerated() {
                 if field == atPoint(locationUser) && FieldStates.getState(index) == .playerNone {
-                    let state: FieldState
-                    if FieldStates.computerIsCircle == true {
-                        state = .playerCross
-                    } else {
-                        state = .playerCircle
-                    }
-                    drawSymbol(state: state, index: index)
+                    drawSymbol(state: .playerCross, index: index)
                     if newSceneData.new {
                         return
                     }
@@ -142,11 +136,7 @@ class GameScene: SKScene {
         FieldStates.setState(index: index, state: state)
         if checkWin(which: state, gameScene: self) {
             ResultScene.result = state
-            if state == .playerCircle {
-                newSceneData.new = true
-            } else {
-                newSceneData.new = true
-            }
+            newSceneData.new = true
         } else if checkWin(which: .playerNone, gameScene: self) {
             ResultScene.result = .playerNone
             newSceneData.new = true
@@ -155,44 +145,33 @@ class GameScene: SKScene {
     
     private func computerPlay() {
         let availableFields = FieldStates.reAvailableFields()
-        if (availableFields.isEmpty) {
+        if availableFields.isEmpty {
             return
-        }
-        var index = availableFields[Int.random(in: 0..<availableFields.count)]
-        
-        
-        let state: FieldState
-        let stateHuman: FieldState
-        if FieldStates.computerIsCircle == true {
-            state = .playerCircle
-            stateHuman = .playerCross
-        } else {
-            state = .playerCross
-            stateHuman = .playerCircle
         }
         
         for avaialbleField in availableFields {
             var stateArray: [FieldState] = FieldStates.stateArray
-            stateArray[avaialbleField] = state
+            stateArray[avaialbleField] = .playerCircle
             
-            if checkWin(which: state, stateArray: stateArray) {
-                index = avaialbleField
-                drawSymbol(state: state, index: index)
+            if checkWin(which: .playerCircle, stateArray: stateArray) {
+                drawSymbol(state: .playerCircle, index: avaialbleField)
                 return
             }
         }
         
         for avaialbleField in availableFields {
-            var humanStateArray: [FieldState] = FieldStates.stateArray
-            humanStateArray[avaialbleField] = stateHuman
+            var stateArray: [FieldState] = FieldStates.stateArray
+            stateArray[avaialbleField] = .playerCross
             
-            if checkWin(which: stateHuman, stateArray: humanStateArray) {
-                index = avaialbleField
-                drawSymbol(state: state, index: index)
+            if checkWin(which: .playerCross, stateArray: stateArray) {
+                drawSymbol(state: .playerCircle, index: avaialbleField)
                 return
             }
         }
-        drawSymbol(state: state, index: index)
+        //let randomIndex = availableFields[Int.random(in: 0..<availableFields.count)]
+        let randomIndex = randomNum.gen()
+
+        drawSymbol(state: .playerCircle, index: randomIndex)
     }
     
     private func resultScene() {
@@ -236,6 +215,7 @@ func checkWin(which: FieldState, stateArray: [FieldState] = FieldStates.stateArr
                 count += 1
             }
         }
+        
         if count == 3 && gameScene != nil {
             for (index, pos) in row.enumerated() {
                 if index == 0 {
@@ -250,4 +230,22 @@ func checkWin(which: FieldState, stateArray: [FieldState] = FieldStates.stateArr
         }
     }
     return false
+}
+
+struct randomNum {
+    static var count = 0
+    static func gen() -> Int {
+        switch count {
+        case 0:
+            return 4
+        case 1:
+            return 0
+        default:
+            break
+        }
+        
+        count += 1
+        print("wrong")
+        return -1
+    }
 }

@@ -7,7 +7,6 @@ enum FieldState {
 
 struct FieldStates {
     static var stateArray: [FieldState] = initStateArray()
-    static let computerIsCircle = initComputerIsCircle()
 
     static func initStateArray() -> [FieldState]{
         var array: [FieldState] = []

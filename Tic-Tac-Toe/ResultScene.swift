@@ -8,23 +8,15 @@ class ResultScene: SKScene {
         backgroundColor = SKColor.orange
         
         let label = SKLabelNode()
-        if ResultScene.result != .playerNone {
-            if FieldStates.computerIsCircle {
-                if ResultScene.result == .playerCircle {
-                    label.text = "You Lost"
-                } else {
-                    label.text = "You Won"
-                }
-            } else {
-                if ResultScene.result == .playerCross {
-                    label.text = "You Lost"
-                } else {
-                    label.text = "You Won"
-                }
-            }
+        
+        if ResultScene.result == .playerCircle {
+            label.text = "You Lost"
+        } else if ResultScene.result == .playerCross {
+            label.text = "You Won"
         } else {
             label.text = "Draw"
         }
+        
         label.fontSize = 30.0
         label.position = CGPoint(x: self.size.width / 2, y: self.size.height / 2)
         label.fontColor = .black
