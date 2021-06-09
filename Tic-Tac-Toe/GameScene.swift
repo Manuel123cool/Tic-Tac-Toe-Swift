@@ -11,9 +11,9 @@ class GameScene: SKScene {
         
         drawFields()
         
-        /*if Int.random(in: 0...1) == 0 {
+        if Int.random(in: 0...1) == 0 {
             computerPlay()
-        }*/
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -168,8 +168,7 @@ class GameScene: SKScene {
                 return
             }
         }
-        //let randomIndex = availableFields[Int.random(in: 0..<availableFields.count)]
-        let randomIndex = randomNum.gen()
+        let randomIndex = availableFields[Int.random(in: 0..<availableFields.count)]
 
         drawSymbol(state: .playerCircle, index: randomIndex)
     }
@@ -230,22 +229,4 @@ func checkWin(which: FieldState, stateArray: [FieldState] = FieldStates.stateArr
         }
     }
     return false
-}
-
-struct randomNum {
-    static var count = 0
-    static func gen() -> Int {
-        switch count {
-        case 0:
-            return 4
-        case 1:
-            return 0
-        default:
-            break
-        }
-        
-        count += 1
-        print("wrong")
-        return -1
-    }
 }
